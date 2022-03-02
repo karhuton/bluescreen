@@ -1,0 +1,152 @@
+body {
+	position: absolute;
+	font-family: "Overpass Mono", monospace;
+	background: #0000aa;
+	color: rgba(255,255,255,0.95);
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+}
+
+body.ready { background: #0000aa; }
+body.notfound {
+	background-color: #0000aa;
+	animation-name: animate-notfound;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	cursor: not-allowed;
+}
+body.waiting { background: #006400; cursor: pointer; }
+body.watching { background: #000000; cursor: not-allowed; }
+body.recording { background: #8b0000; cursor: pointer; }
+body.error { background: #000000; cursor: pointer;}
+body.connecting {
+	background-color: #0000aa; 
+	animation-name: animate-connecting;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	cursor: pointer;
+}
+
+@keyframes animate-connecting {
+	0% { background-color: #0000aa; }
+	50% { background-color: #0000dd; }
+	100 { background-color: #0000aa; }
+}
+
+@keyframes animate-notfound {
+	0% { background-color: #0000aa; }
+	50% { background-color: #000022; }
+	100 { background-color: #0000aa; }
+}
+
+body.ready #code { color: #0000aa;	}
+body.notfound #code { color: #0000aa;	}
+body.waiting #code { color: #006400; }
+body.watching #code { color: #ffffff; }
+body.recording #code { color: #8b0000; }
+body.error #code { color: #000000; }
+body.connecting #code { color: #0000aa; }
+
+body .message { display: none; }
+body.ready .message.ready { display: block; }
+body.notfound .message.notfound { display: block; }
+body.connecting .message.connecting { display: block; }
+body.waiting .message.waiting { display: block; }
+body.watching .message.watching { display: block; }
+body.recording .message.recording { display: block; }
+body.error .message.error { display: block; }
+
+body.ready div.view.ready { display: block; }
+body.notfound div.view.notfound { display: block; }
+body.connecting div.view.connecting { display: block; }
+body.waiting div.view.waiting { display: block; }
+body.watching div.view.watching { display: block; }
+body.recording div.view.recording { display: block; }
+body.error div.view.error { display: block; }
+
+body.recording div.view.video { display: block; visibility: hidden; }
+
+div.view {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: none;
+}
+
+div.view .container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#display {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+#video {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+div.box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	max-width: 600px;
+	min-width: 25%;
+	transform: translateX(-50%) translateY(-50%);	
+	text-align: center;
+	cursor: pointer; 
+}
+
+h1 {
+	display: inline-block;
+	background: rgba(255,255,255,0.95);
+	margin-bottom: 1em;
+	padding: 10px;
+	font-size: xx-large;
+}
+
+p {
+	margin-bottom: 1em;
+	text-align: center;
+	line-height: 1.5em;
+}
+
+a,a:visited,a:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+#code {
+	font-family: "Overpass Mono", monospace;
+	display: block;
+	background: rgba(255,255,255,0.95);
+	color: #0000aa;	
+	text-align: center;
+	line-height: xx-large;
+	font-size: xx-large;
+	cursor: text;
+}
+
+.message {
+	width: 100%;
+	text-align: center;
+}
+
+[contenteditable]:focus {
+    outline: 0px solid transparent;
+    box-shadow: 0px 0px 10px 5px rgba(255,255,255,0.3);
+}
+
+::placeholder {
+	color: rgba(0,0,170,0.3);
+	padding: 10px;
+}
+
+

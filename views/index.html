@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon.png">
+	<link href='/css/reset.css' rel='stylesheet' type='text/css'>
+	<link href='/css/blue.css' rel='stylesheet' type='text/css'>
+	<link href="https://fonts.googleapis.com/css?family=Overpass+Mono:700&display=block" rel="stylesheet">
+
+	<script>const JWT_TOKEN_FROM_PAGE_LOAD = '${ jwt }'</script>
+
+	<script>const USERID = '${ userId }'</script>
+
+	<script src="/js/xhttp-json-jwt.js"></script>
+	<script src="/js/blue.js"></script>
+
+	<script>
+		var bodyClicksEnabled = true
+
+		function disableBodyClicks() { bodyClicksEnabled = false }
+
+		function enableBodyClicks() { bodyClicksEnabled = true }
+
+		function bodyClick() {
+			if ( !bodyClicksEnabled ) { return }
+
+			let id = document.querySelector('#code').innerText
+
+			switch (getState()) {
+				case 'ready':
+					startCapture();
+					break;
+				case 'connecting':
+				case 'waiting':
+				case 'recording':
+					stopCapture();
+					break;
+				case 'error':
+					location.reload(true)
+					break;
+				case 'watching':
+				case 'notfound':
+				default:
+					break;
+			}
+		}
+	</script>
+	<title>Blue Screen</title>
+</head>
+<!-- <body onload="init()"> -->
+<body class="ready" onclick="bodyClick()" onload="init()">
+	<div class="view ready connecting waiting recording notfound error">
+		<div class="box">
+			<h1 id="code" contenteditable="true" onfocus="disableBodyClicks()" onblur="setTimeout(enableBodyClicks, 200)" onclick="disableBodyClicks(); event.stopPropagation()">${ roomId }</h1>
+			<span id="viewer" style="display: none">${ userId }</span>
+			<div class="message">Click here start presenting</div>
+			<div class="message ready">Click to start presenting</div>
+			<div class="message connecting">Connecting ...</div>
+			<div class="message waiting">Waiting for viewers</div>
+			<div class="message recording">Sharing your screen now</div>
+			<div class="message error">Doesn't work – refresh page</div>
+			<div class="message notfound">Not found – check code</div>
+			<br />
+			<div id="participants" class="participants">&nbsp;</div>
+
+		</div>
+	</div>
+	<div class="view watching" onclick="">
+		<div class="container">
+			<img id="display" />
+		</div>
+	</div>
+	<div class="view video" onclick="stopCapture(); event.stopPropagation()">
+		<div class="container">
+			<video id="video" autoplay muted></video>
+		</div>
+	</div>
+</body>
+</html>
