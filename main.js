@@ -489,10 +489,12 @@ function expressHerokuHttpsRedirect(req, res, next) {
 
   if ( req.headers["x-forwarded-proto"] != "https" ) {
   	res.redirect(302, "https://" + req.hostname + req.originalUrl)
+  	res.send()
+  	return
   }
 
   // DO NOT CONTINUE WITH next()
- 	return
+ 	next()
 }
 
 function expressJwtHandler(req, res, next) {
