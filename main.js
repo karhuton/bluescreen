@@ -192,7 +192,9 @@ function index(req, res, next) {
 
 	updateParticipantCount(room.roomId)
 
-	return res.render('index', {locals: {jwt: req.token, roomId: room.roomId, userId: userId }});
+	let initialState = ROOMS[room.roomId].activeParticipants > 1 ? 'ready' : 'empty'
+
+	return res.render('index', {locals: {jwt: req.token, initialState: initialState, roomId: room.roomId, userId: userId }});
 
 }
 

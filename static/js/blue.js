@@ -43,7 +43,7 @@ function updateMeta(meta) {
 
 	if ( partCount > 1 ) {
 		document.querySelector('#participants')
-			.innerText = `${ partCount } other person${ partCount > 1 ? 's' : ''} here`
+			.innerText = `${ partCount } other person${ partCount > 1 ? 's' : ''} here!`
 	} else {
 		document.querySelector('#participants').innerText = '&nbsp;'
 	}
@@ -79,9 +79,21 @@ async function heartbeat() {
 
 			/* viewer states */
 
-			case "ready":
-				if ( META.imageReady ) { // TODO: check timestamp and ignore old image?
+			case "empty":
+				if ( META.imageReady ) {
 					setState('watching')
+				}
+				else if ( META.activeParticipants >= 2 ) {
+					setState('ready')
+				}
+				break;
+
+			case "ready":
+				if ( META.imageReady ) {
+					setState('watching')
+				}
+				else if ( META.activeParticipants < 2 ) {
+					setState('empty')
 				}
 				break;
 
@@ -188,7 +200,7 @@ async function upload() {
 
 	try {
 
-		console.log("Doing upload, state is " + getState())
+		//console.log("Doing upload, state is " + getState())
 
 		let videoElement = document.querySelector('#video')
 		let canvasElement = captureImageFromVideo(videoElement)
@@ -225,7 +237,7 @@ async function download() {
 		console.debug("download: previous download still in progress - skipping interval")
 	}
 
-	console.log("Doing download, state is " + getState())
+	//console.log("Doing download, state is " + getState())
 
 	let oldFrame = META.frame || -1
 
@@ -273,7 +285,7 @@ async function stopUpload() {
 
 	//  always try to close, hide failure from user
 
-	console.log("Doing stopUpload, state is " + getState())
+	console.log("stop upload. state is " + getState())
 
 	try {
 
@@ -317,7 +329,8 @@ function captureImageFromVideo(video) {
  ****************/
 
 const STATE = {
-	'ready': true
+	'empty': true
+	,'ready': true
 	,'connecting': true
 	,'waiting': true
 	,'watching': true

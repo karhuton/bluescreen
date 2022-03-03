@@ -15,9 +15,10 @@ body {
 	justify-content: center;
 }
 
-body.ready { background: #0000aa; }
+body.empty { background: #0000aa; }
+body.ready { background: #0000cc; }
 body.notfound {
-	background-color: #0000aa;
+	background-color: #000099;
 	animation-name: animate-notfound;
 	animation-duration: 2s;
 	animation-iteration-count: infinite;
@@ -28,7 +29,7 @@ body.watching { background: #000000; cursor: not-allowed; }
 body.recording { background: #8b0000; cursor: pointer; }
 body.error { background: #000000; cursor: pointer;}
 body.connecting {
-	background-color: #0000aa; 
+	background-color: #0000cc;
 	animation-name: animate-connecting;
 	animation-duration: 2s;
 	animation-iteration-count: infinite;
@@ -36,17 +37,18 @@ body.connecting {
 }
 
 @keyframes animate-connecting {
-	0% { background-color: #0000aa; }
-	50% { background-color: #0000dd; }
-	100 { background-color: #0000aa; }
+	0% { background-color: #0000cc; }
+	50% { background-color: #0000ff; }
+	100 { background-color: #0000cc; }
 }
 
 @keyframes animate-notfound {
-	0% { background-color: #0000aa; }
+	0% { background-color: #0000cc; }
 	50% { background-color: #000022; }
-	100 { background-color: #0000aa; }
+	100 { background-color: #0000cc; }
 }
 
+body.empty #code { color: #0000aa;	}
 body.ready #code { color: #0000aa;	}
 body.notfound #code { color: #0000aa;	}
 body.waiting #code { color: #006400; }
@@ -58,6 +60,7 @@ body.connecting #code { color: #0000aa; }
 body .message { display: none; line-height: 120%;}
 body .typing-info { display: none; }
 
+body.empty .message.empty { display: block; }
 body.ready .message.ready { display: block; }
 body.notfound .message.notfound { display: block; }
 body.connecting .message.connecting { display: block; }
@@ -66,6 +69,7 @@ body.watching .message.watching { display: block; }
 body.recording .message.recording { display: block; }
 body.error .message.error { display: block; }
 
+body.empty div.view.empty { display: flex; }
 body.ready div.view.ready { display: flex; }
 body.notfound div.view.notfound { display: flex; }
 body.connecting div.view.connecting { display: flex; }
@@ -89,13 +93,14 @@ div.view.ready {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top:  40%;
+	justify-content: center;
 }
 
 div.view .box {
 	position: relative;
 	width:  60%;
 	min-width: 300px;
+	min-height: 250px;
 	text-align: center;
 }
 

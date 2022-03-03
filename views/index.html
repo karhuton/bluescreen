@@ -21,16 +21,17 @@
 	<script src="/js/blue.js"></script>
 
 	<script>
-		var skipBodyClick = false
+		var skipViewClick = false
 		var oldCode = null
 
-		function bodyClick() {
-			if ( skipBodyClick ) {
-				skipBodyClick = false
+		function toggleRecording() {
+			if ( skipViewClick ) {
+				skipViewClick = false
 				return
 			}
 
 			switch (getState()) {
+				case 'empty':
 				case 'ready':
 					startCapture();
 					break;
@@ -51,10 +52,13 @@
 	<title>Blue Screen</title>
 </head>
 <!-- <body onload="init()"> -->
-<body class="ready" onclick="bodyClick(); event.stopPropagation();" onload="init()">
-	<div class="view ready connecting waiting recording notfound error">
+<body class="${ initialState || 'empty' }" onload="init()" onclick="toggleRecording()">
+	<div class="view empty ready connecting waiting recording notfound error">
 		<div class="box">
-			<h1 id="code" spellcheck="false" contenteditable="true" onfocus="oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="console.log('blurr'); document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipBodyClick = true } " onclick="event.stopPropagation()">${ roomId }</h1>
+			<!-- really oddd. need to focus from grabbing the h1 when clicking above it?? -->
+			<p>&nbsp;</p>
+			<h1 id="code" spellcheck="false" contenteditable="true" onfocus="if ( event.target.id != 'code' ) { console.log('go away') }; oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipViewClick = true } " onclick="if ( event.target.id != 'code' ) { console.log('go away') }; event.stopPropagation(); event.preventDefault(); return false">${ roomId }</h1>
+			<div class="message empty"><p>Press anywhere to start presenting<br />or change the room name</p></div>
 			<div class="message ready"><p>Press anywhere to start presenting<br />or change the room name</p></div>
 			<div class="message connecting">Connecting ...</div>
 			<div class="message waiting"><p>Waiting for participants <br />Press anywhere to stop</p></div>
