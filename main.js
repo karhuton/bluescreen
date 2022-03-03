@@ -39,6 +39,7 @@
 
  - recording tilassa:
  - etähallinta (fill screen vs show all)
+ - etähallinta js trigger browser full screen ?
  - etähallinta stop & share napit
  - etähallinta näytä vierailijoiden määrä -> älä upload jos ei ole vierailijoita
 
