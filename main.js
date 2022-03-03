@@ -4,7 +4,7 @@
  - safari mobile toimimaan
  - safari ylipäätänsä toimimaan (päivitys loppuu ekan ruudun jälkeen kesken?)
 
- - nopeampi päivitystahti
+ - nopeampi päivitystahti -> käytä await -tyyppistä päivitä niin usein kun pystyy! mut minimi slotti
 
  - change code -nappi + enter ja esc toimimaan code inputissa
  - share link copy-paste
@@ -71,7 +71,7 @@ const ROOMS = {}
 const USERS = {}
 
 const REGEX_UUID = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/
-const REGEX_ID = /\/([0-9a-fA-F]+)$/
+const REGEX_ID = /\/([\-0-9a-z]+)$/i
 
 const JWT_SECRET = 'blue-in-the-face-is-the-best-band-ever'
 const JWT_EXPIRE = '7h'
@@ -96,12 +96,11 @@ app.use(jwtParse({ secret: JWT_SECRET, credentialsRequired: false }), expressJwt
 app.use(bodyParser.raw({ type: 'application/data-url', limit: '5mb' }))
 app.use(bodyParser.json())
 
-app.get('/', index)
 app.post('/upload', upload)
 app.get('/download', download)
 app.get('/stop', stop)
 app.get('/heartbeat', heartbeat)
-app.get('/[0-9a-fA-F]+$', index) // request specific roomId
+app.get('/*', index) // request specific roomId
 
 
 app.listen(process.env.PORT || 3000, function () {
@@ -124,7 +123,7 @@ function heartbeat(req, res, next) {
 	if ( !roomId ) {
 		res.status(404).send("User does not have a room");
 
-		return next();
+		return
 	}
 
 	let room = ROOMS[roomId] ? ROOMS[roomId] : null
@@ -141,13 +140,13 @@ function heartbeat(req, res, next) {
 		.set('X-MetaJSON', JSON.stringify(meta))
 		.send()
 
-		return next()
+		return
 
 	} else {
 //		console.warn("heartbeat: no room found for user: " + userId)
 		res.status(419).send("Room expired");
 
-		return next();
+		return;
 	}
 }
 
@@ -158,22 +157,22 @@ function index(req, res, next) {
 
 	if ( !userId ) {
 			res.status(500).send("No user token available")
-			return next()
+			return
 	}
 
 	let pathId = getIdFromPath(req.path)
-
-	if ( pathId ) {
-		if ( !ROOMS[pathId] ) {
-			res.status(404).send("Not found")
-			return next()
-		}
-
-		addParticipant(pathId, userId)
-	}
-
 	let room
 
+	// this is the case when url has new room
+	if ( pathId ) {
+		if ( !ROOMS[pathId] ) {
+			room = makeRoom(userId, pathId)
+		}
+
+		addParticipant(userId, pathId)
+	}
+
+	// this is the case where roomId is stored in session
 	if ( !USERS[userId].roomId) {
 		room = makeRoom(userId)
 
@@ -188,7 +187,7 @@ function index(req, res, next) {
 
 	if ( moment().diff(moment(room.timestamp), 'minutes') > ROOM_TIMEOUT ) {
 		res.status(419).send("Room expired");
-		return next()
+		return
 	}
 
 	updateParticipantCount(room.roomId)
@@ -197,42 +196,52 @@ function index(req, res, next) {
 
 }
 
-function makeRoom(userId) {
-	// create new room (try 100 times to find an unused or an expired room)
-	for (let i = 0 ; i < 10000 ; i++) {
-		let newRoomId = hex.generate().replace(/^#/, '')
+function makeRoom(userId, roomId) {
+	let newRoomId = roomId
 
-		if ( ROOMS[newRoomId] ) {
-			if ( moment().diff( ROOMS[newRoomId].timestamp, 'minutes' ) < ROOM_TIMEOUT ) {
-				continue
+	if ( !roomId ) {
+		// create new room (try several times to find an unused or an expired room)
+		let genId
+		for (let i = 0 ; i < 10000 ; i++) {
+			let tryId = hex.generate().replace(/^#/, '')
+
+			if ( ROOMS[tryId] ) {
+				if ( moment().diff( ROOMS[tryId].timestamp, 'minutes' ) < ROOM_TIMEOUT ) {
+					continue
+				}
 			}
+
+			genId = tryId
+			break
 		}
 
-		ROOMS[newRoomId] = {
-			roomId: newRoomId
-			,timestamp: moment()
-			,image: null
-			,width: null
-			,height: null
-			,mimetype: null
-			,size: null
-			,frame: 0
-			,participants: { }
-			,participantCount: 0
-			,activeParticipants: 0
-			,inactiveParticipants: 0
-		}
+		if ( !genId ) { throw `makeRoom: can't generate new id` }
 
-		addParticipant(newRoomId, userId)
-
-		return ROOMS[newRoomId]
+		newRoomId = genId
 	}
 
-	return null
+	ROOMS[newRoomId] = {
+		roomId: newRoomId
+		,timestamp: moment()
+		,image: null
+		,width: null
+		,height: null
+		,mimetype: null
+		,size: null
+		,frame: 0
+		,participants: { }
+		,participantCount: 0
+		,activeParticipants: 0
+		,inactiveParticipants: 0
+	}
+
+	addParticipant(userId, newRoomId)
+
+	return ROOMS[newRoomId]
 }
 
 
-function addParticipant(roomId, userId) {
+function addParticipant(userId, roomId) {
 	if ( !userId ) {
 		throw `addParticipant: missing usedId`
 	}
@@ -251,6 +260,7 @@ function addParticipant(roomId, userId) {
 		return false
 	}
 
+	// TODO maybe just use room.participants[userId] = moment()
 	room.participants[userId] = {
 		userId: userId,
 		timestamp: moment()
@@ -270,13 +280,13 @@ function upload(req, res, next) {
 	let response = getUserAndRoomAndCheckStuff(req, res)
 
 	// we assume getUser... has sent error message to client
-	if ( !response ) { return next() }
+	if ( !response ) { return  }
 
 	let [userId, room, meta ] = response
 
 	if ( !meta.mimetype || !meta.imageWidth || !meta.imageHeight ) {
 		res.status(400).send("Missing some of required meta data: mimetype, width, height")
-		return next()
+		return
 	}
 
 	room.mimetype = meta.mimetype
@@ -285,7 +295,7 @@ function upload(req, res, next) {
 
 	if ( !req.body ) {
 		res.status(400).send("Image data is missing")
-		return next()
+		return
 	}
 
 	room.image = req.body
@@ -305,7 +315,7 @@ function upload(req, res, next) {
 	.set('X-MetaJSON', JSON.stringify(responseMeta))
 	.send()
 
-	return next()
+	return
 }
 
 function getUserAndRoomAndCheckStuff(req, res, ignoreExpire) {
@@ -384,7 +394,7 @@ function download(req, res, next) {
 		let response = getUserAndRoomAndCheckStuff(req, res)
 
 		// we assume getUser... has sent error message to client
-		if ( !response ) { return next() }
+		if ( !response ) { return }
 
 		let [userId, room, meta ] = response
 
@@ -397,26 +407,26 @@ function download(req, res, next) {
 			.set('X-MetaJSON', JSON.stringify(returnMeta))
 			.send("Not modified");
 
-			return next()
+			return
 		}
 
 		if ( !room.image ) {
 			res.status(204)
 			.set('X-MetaJSON', JSON.stringify(returnMeta))
 			.send("No content");
-			return next()
+			return
 		}
 
 		res.status(200)
 		.set('Content-Type', room.mimetype)
 		.set('X-MetaJSON', JSON.stringify(returnMeta))
 		.end(room.image)
-		return next()
+		return
 
 	} catch (err) {
 		console.error("Failed in download reponse", err)
 		res.status(500).send("Fail")
-		return next()
+		return
 	}	
 }
 
@@ -435,7 +445,7 @@ function stop(req, res, next) {
 	ROOMS[roomId].size = null
 
 	res.status(200).send("OK")
-	return next()
+	return
 }
 
 /***********

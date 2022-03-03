@@ -39,7 +39,15 @@ function updateMeta(meta) {
 
 	META = meta
 
-	document.querySelector('#participants').innerText = `${META.activeParticipants} user${ META.activeParticipants > 1 ? 's' : ''} here`
+	let partCount = META.activeParticipants - 1
+
+	if ( partCount > 1 ) {
+		document.querySelector('#participants')
+			.innerText = `${ partCount } other person${ partCount > 1 ? 's' : ''} here`
+	} else {
+		document.querySelector('#participants').innerText = '&nbsp;'
+	}
+
 }
 
 

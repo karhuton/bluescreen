@@ -4,9 +4,13 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="apple-mobile-web-app-capable" content="yes">
+
 	<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon.png">
+	<link rel="icon" type="image/png" sizes="180x180" href="/img/appicon.png">
+
 	<link href='/css/reset.css' rel='stylesheet' type='text/css'>
 	<link href='/css/blue.css' rel='stylesheet' type='text/css'>
+
 	<link href="https://fonts.googleapis.com/css?family=Overpass+Mono:700&display=block" rel="stylesheet">
 
 	<script>const JWT_TOKEN_FROM_PAGE_LOAD = '${ jwt }'</script>
@@ -17,16 +21,14 @@
 	<script src="/js/blue.js"></script>
 
 	<script>
-		var bodyClicksEnabled = true
-
-		function disableBodyClicks() { bodyClicksEnabled = false }
-
-		function enableBodyClicks() { bodyClicksEnabled = true }
+		var skipBodyClick = false
+		var oldCode = null
 
 		function bodyClick() {
-			if ( !bodyClicksEnabled ) { return }
-
-			let id = document.querySelector('#code').innerText
+			if ( skipBodyClick ) {
+				skipBodyClick = false
+				return
+			}
 
 			switch (getState()) {
 				case 'ready':
@@ -38,32 +40,30 @@
 					stopCapture();
 					break;
 				case 'error':
-					location.reload(true)
-					break;
 				case 'watching':
 				case 'notfound':
 				default:
 					break;
 			}
 		}
+
 	</script>
 	<title>Blue Screen</title>
 </head>
 <!-- <body onload="init()"> -->
-<body class="ready" onclick="bodyClick()" onload="init()">
+<body class="ready" onclick="bodyClick(); event.stopPropagation();" onload="init()">
 	<div class="view ready connecting waiting recording notfound error">
 		<div class="box">
-			<h1 id="code" contenteditable="true" onfocus="disableBodyClicks()" onblur="setTimeout(enableBodyClicks, 200)" onclick="disableBodyClicks(); event.stopPropagation()">${ roomId }</h1>
-			<span id="viewer" style="display: none">${ userId }</span>
-			<div class="message">Click here start presenting</div>
-			<div class="message ready">Click to start presenting</div>
+			<h1 id="code" spellcheck="false" contenteditable="true" onfocus="oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="console.log('blurr'); document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipBodyClick = true } " onclick="event.stopPropagation()">${ roomId }</h1>
+			<div class="message ready"><p>Press anywhere to start presenting<br />or change the room name</p></div>
 			<div class="message connecting">Connecting ...</div>
-			<div class="message waiting">Waiting for viewers</div>
+			<div class="message waiting"><p>Waiting for participants <br />Press anywhere to stop</p></div>
 			<div class="message recording">Sharing your screen now</div>
 			<div class="message error">Doesn't work – refresh page</div>
 			<div class="message notfound">Not found – check code</div>
+			<div class="typing-info"><p>Type new room + hit enter</p><p>ESC to cancel</p></div>
 			<br />
-			<div id="participants" class="participants">&nbsp;</div>
+			<div id="participants" class="message">&nbsp;</div>
 
 		</div>
 	</div>
@@ -78,4 +78,36 @@
 		</div>
 	</div>
 </body>
+<script>
+
+	document.querySelector('#code').addEventListener('keydown', (e) => {
+		let allowedChars = /^[\-a-z0-9]+$/i
+    	let codeInput = e.target
+
+
+	    if (e.key == "Enter") {
+	    	oldCode = null
+	        e.preventDefault();
+	        window.open("/" + codeInput.innerText,"_self")
+	    }
+
+	    if ( e.key == "Escape" ) {
+	    	codeInput.blur()
+	    }
+
+	    if ( !allowedChars.test(e.key) ) {
+	    	codeInput.classList.remove("bad-input")
+	    	codeInput.classList.add("bad-input")
+
+	    	if ( !codeInput.timer ) {
+		    	codeInput.timer = setTimeout(() => { codeInput.classList.remove("bad-input"); delete codeInput.timer }, 500)
+	    	}
+
+	        e.preventDefault();
+	    }
+
+	});
+
+
+</script>
 </html>
