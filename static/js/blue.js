@@ -16,8 +16,8 @@ function init() {
  **********************/
 
 const INTERVALS = {
-	heartbeat: setInterval(heartbeat, 5000)
-	, upload: setInterval(upload, 2000)
+	heartbeat: setInterval(heartbeat, 1000)
+	, upload: setInterval(upload, 1000)
 	, download: setInterval(download, 1000)
 }
 
