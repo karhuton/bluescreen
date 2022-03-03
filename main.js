@@ -491,7 +491,8 @@ function expressHerokuHttpsRedirect(req, res, next) {
   	res.redirect(302, "https://" + req.hostname + req.originalUrl)
   }
 
- 	next()
+  // DO NOT CONTINUE WITH next()
+ 	return
 }
 
 function expressJwtHandler(req, res, next) {
