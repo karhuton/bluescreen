@@ -1,10 +1,56 @@
 
 /* TODO
  
- - jwt tokenien expirointi ja fiksumpi sessiohallinta
- - refresh code -nappi + enter ja esc toimimaan code inputissa
- – presenter rooli
- – cookie: muista minut
+ - safari mobile toimimaan
+ - safari ylipäätänsä toimimaan (päivitys loppuu ekan ruudun jälkeen kesken?)
+
+ - nopeampi päivitystahti
+
+ - change code -nappi + enter ja esc toimimaan code inputissa
+ - share link copy-paste
+
+ - navigate out js-eventti joka ampuu stop jos presentoi (tai sit aktiivisempi stop presenting?)
+
+ - ohje-ikoni:
+ - miten toimii?
+ -> screensharing over phone
+ -> super simple meeting room tv
+ -> allow others to share things via your laptop on meeting room tv, when you're the only one connected
+ -> tee näistä mainossivu: bluescreen.live/info
+
+ - salasanasuojaus? ei ole. kiinnostaako? laita viestiä
+ - yksityisyydensuoja: (EU:ssa, ei cookieta, ei seurantaa, ei tallenneta mihinkään - vain muistissa - tyhjennetään 5min poistumisen jälkeen )
+ - tekijä + yhteystiedot: karhuton.com
+
+
+ - minifoi staattinen js
+ - kevennä metajsonin kokoa
+
+-------
+
+ -> nyt voi julkaista kavereille
+
+-------
+
+ - 6h refresh page jos ei aktiviteettia (huom jwt expires nyt 7h)
+ - tutki pitääkö mediastream "tyhjentää" välillä?
+
+ - siivoa käyttämättömät templaattijutut html:stä
+
+ - recording tilassa:
+ - etähallinta (fill screen vs show all)
+ - etähallinta stop & share napit
+ - etähallinta näytä vierailijoiden määrä -> älä upload jos ei ole vierailijoita
+
+ - laadun parannus:
+ - etähallinta: quality-vs-speed -> syö kaistaa ja/tai hidastaa nopeutta
+ - speed: mittaa lähetysnopeutta -> säädä laatua huonommaksi
+ - speed: mittaa lähetysnopeutta -> säädä nopeutta huonommaksi ()
+ - default: speed
+
+ - voiko kuvia helposti diffata nopeasti? screensharessa usein 1:1.. päivitä vain jos muuttunut?
+ - > voisi vaikka itse katsoa mallia tästä: https://github.com/rsmbl/Resemble.js
+
 
  */
 
@@ -17,6 +63,7 @@ const express = require('express')
 	,hex = require('random-hex')
 	,moment = require('moment')
 
+
 const ROOM_TIMEOUT = 60
 
 const ROOMS = {}
@@ -26,31 +73,27 @@ const REGEX_UUID = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{
 const REGEX_ID = /\/([0-9a-fA-F]+)$/
 
 const JWT_SECRET = 'blue-in-the-face-is-the-best-band-ever'
+const JWT_EXPIRE = '7h'
+
+
+/*****************
+ * Express setup *
+ *****************/
+
 
 const app = express()
+
+if ( process.env.PRODUCTION ) {
+	app.use(expressHerokuHttpsRedirect)
+}
 
 app.engine('html', template);
 app.set('views', 'views')
 app.set('view engine', 'html')
 app.use(express.static('static'))
-app.use(jwtParse({ secret: JWT_SECRET, credentialsRequired: false }), function (req, res, next) {
-	if ( !req.user ) {
-		let user = { id: uuid() }
-		let token = jwtSign.sign(user, JWT_SECRET, { expiresIn: '1h' })
-
-		USERS[user.id] = user
-		req.user = user
-		req.token = token
-
-	}
-	next()
-})
+app.use(jwtParse({ secret: JWT_SECRET, credentialsRequired: false }), expressJwtHandler)
 app.use(bodyParser.raw({ type: 'application/data-url', limit: '5mb' }))
 app.use(bodyParser.json())
-
-/***********
- * Routing *
- ***********/
 
 app.get('/', index)
 app.post('/upload', upload)
@@ -63,6 +106,8 @@ app.get('/[0-9a-fA-F]+$', index) // request specific roomId
 app.listen(process.env.PORT || 3000, function () {
   console.log('Listening on port ' + (process.env.PORT || 3000))
 })
+
+
 
 
 
@@ -411,9 +456,13 @@ function roomStatusCheck() {
 	let keys = Object.keys(ROOMS)
 
 	if ( keys.length == 0 ) {
-		console.log("No active rooms")
+		if ( !process.env.PRODUCTION ) {
+			console.log("No active rooms")
+		}
 	} else {
-//		console.log("Active rooms: " + keys.length)
+		if ( !process.env.PRODUCTION ) {
+			console.log("Active rooms: " + keys.length)
+		}
 
 		keys.forEach(function(roomId){
 			let room = ROOMS[roomId]
@@ -423,7 +472,9 @@ function roomStatusCheck() {
 
 				updateParticipantCount(roomId)
 
-//				console.log("roomId: " + roomId + " frame: " + room.frame + (room.image ? " " + room.width + "x" + room.height + " (" + Math.round(room.size/1024) + "kb)" : "") + " timestamp: " + moment(room.timestamp).format('YYYY-MM-DD HH:mm:ss') + ( expired ? " (expired)" : "" ) + " active: " + room.activeParticipants + " inactive: " + room.inactiveParticipants)
+				if ( !process.env.PRODUCTION ) {
+					console.log("roomId: " + roomId + " frame: " + room.frame + (room.image ? " " + room.width + "x" + room.height + " (" + Math.round(room.size/1024) + "kb)" : "") + " timestamp: " + moment(room.timestamp).format('YYYY-MM-DD HH:mm:ss') + ( expired ? " (expired)" : "" ) + " active: " + room.activeParticipants + " inactive: " + room.inactiveParticipants)
+				}
 			}
 
 			if (expired) {
@@ -431,5 +482,28 @@ function roomStatusCheck() {
 			}
 		})
 	}
+}
+
+function expressHerokuHttpsRedirect(req, res, next) {
+
+  if ( req.headers["x-forwarded-proto"] != "https" ) {
+  	res.redirect(302, "https://" + req.hostname + req.originalUrl)
+  }
+
+ 	next()
+}
+
+function expressJwtHandler(req, res, next) {
+	if ( !req.user ) {
+		let user = { id: uuid() }
+		let token = jwtSign.sign(user, JWT_SECRET, { expiresIn: JWT_EXPIRE })
+
+		USERS[user.id] = user
+		req.user = user
+		req.token = token
+
+	}
+
+	next()
 }
 
