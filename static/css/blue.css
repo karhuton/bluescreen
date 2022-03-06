@@ -178,12 +178,12 @@ a,a:visited,a:hover {
 }
 
 @keyframes animate-copied {
-	0% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
-	50% { color: #fff; background-color: #00f; box-shadow: 0px 0px 10px 5px rgba(0,0,255,0.5); }
-	100% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+	0% { background-color: #000 }
+	50% { color: #fff; background-color: #0000aa;  }
+	100% { background-color: #000 }
 }
 
-#code.copied {
+#shareview.copied {
 	animation-name: animate-copied;
 	animation-duration: 0.25s;
 	animation-iteration-count: 1;
@@ -206,4 +206,32 @@ a,a:visited,a:hover {
 
 div.bottomBar {
 	padding: 1em;
+}
+
+#shareview {
+	display: none;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+
+	background: #000;
+	color: #fff;
+}
+
+#shareview.visible {
+	display: flex;
+}
+
+#qrcode {
+	text-align:  center;
+}
+
+#qrcode img {
+	display: inline-block !important;
 }

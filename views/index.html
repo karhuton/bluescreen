@@ -17,6 +17,7 @@
 
 	<script>const USERID = '${ userId }'</script>
 
+	<script src="/js/qrcode.min.js"></script>
 	<script src="/js/xhttp-json-jwt.js"></script>
 	<script src="/js/blue.js"></script>
 
@@ -62,34 +63,28 @@
 			}
 		}
 
-		async function askToCopy() {
-
-			if ( navigator.permissions ) {
-
-				let result = await navigator.permissions.query({name: "clipboard-write"})
-
-				if (result.state == "granted" || result.state == "prompt") {
-					copyLink()
-				}
-
-			} else {
-				copyLink()
-			}
-
-			return false
-		}
-
 		async function copyLink() {
 	    	let linkToPage = "" + window.location.href
 
 			await navigator.clipboard.writeText(linkToPage)
 
-			document.querySelector('#code').classList.add('copied')
+			document.querySelector('#shareview').classList.add('copied')
 
 			setTimeout(() =>{
-				document.querySelector('#code').classList.remove('copied')
+				document.querySelector('#shareview').classList.remove('copied')
 			}, 500)
 		}
+
+		function showShareView() {
+			QrCode.makeCode(window.location.href)
+
+			document.querySelector("#shareview").classList.add('visible')
+		}
+
+		function hideShareView() {
+			document.querySelector("#shareview").classList.remove('visible')
+		}
+
 	</script>
 	<title>Blue Screen</title>
 </head>
@@ -114,7 +109,7 @@
 
 		</div>
 		<div class="bottomBar">
-			<div class="message empty ready connecting waiting recording" onclick="copyLink(); event.stopPropagation(); return false;">[ Share link ]</div>
+			<div class="message empty ready connecting waiting recording" onclick="showShareView(); event.stopPropagation(); return false;">[ Share link ]</div>
 		</div>
 	</div>
 	<div class="view watching" onclick="">
@@ -125,6 +120,16 @@
 	<div class="view video" onclick="stopCapture(); event.stopPropagation()">
 		<div class="container">
 			<video id="video" autoplay muted></video>
+		</div>
+	</div>
+	<div id="shareview" class="view">
+		<div></div>
+		<div class="box">
+			<div id="qrcode"></div>
+		</div>
+		<div class="message empty ready connecting waiting recording" onclick="copyLink(); event.stopPropagation(); return false;">[ Copy link ]</div>
+		<div class="bottomBar">
+			<div class="message empty ready connecting waiting recording" onclick="hideShareView(); event.stopPropagation(); return false;">[ Close ]</div>
 		</div>
 	</div>
 </body>
@@ -158,6 +163,14 @@
 
 	});
 
+	var QrCode = new QRCode(document.getElementById("qrcode"), {
+		text: window.location.href,
+		width: 256,
+		height: 256,
+		colorDark : "#000000",
+		colorLight : "#ffffff",
+		correctLevel : QRCode.CorrectLevel.H
+	});
 
 </script>
 </html>
