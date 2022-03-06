@@ -194,6 +194,7 @@ async function startCapture() {
 
 		if ( !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia ) {
 			alert("Your browser doesn't support screen sharing with a web browser.\n\nAt the moment (last checked 6.3.2022) you'll likely need a computer to share your screen.")
+			return false
 		}
 
 		let stream = await navigator.mediaDevices.getDisplayMedia({
