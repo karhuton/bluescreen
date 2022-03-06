@@ -21,6 +21,20 @@
 	<script src="/js/blue.js"></script>
 
 	<script>
+		const STATE = {
+			'empty': true
+			,'ready': true
+			,'connecting': true
+			,'waiting': true
+			,'watching': true
+			,'recording': true
+			,'notfound': true
+			,'error': true
+		}
+
+		var ERROR_TIMEOUT = 10*1000
+		var ERROR_TIMER = null
+
 		var skipViewClick = false
 		var oldCode = null
 
@@ -64,10 +78,10 @@
 			<div class="message waiting"><p>Waiting for participants <br />Press anywhere to stop</p></div>
 			<div class="message recording">Sharing your screen now</div>
 			<div class="message error">Doesn't work – refresh page</div>
-			<div class="message notfound">Not found – check code</div>
+			<div class="message notfound">Room not found – check code</div>
 			<div class="typing-info"><p>Type new room + hit enter</p><p>ESC to cancel</p></div>
 			<br />
-			<div id="participants" class="message">&nbsp;</div>
+			<div id="participants" class="message ready connecting waiting recording">&nbsp;</div>
 
 		</div>
 	</div>

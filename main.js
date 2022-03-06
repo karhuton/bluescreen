@@ -1,15 +1,8 @@
 
 /* TODO
  
- - safari mobile toimimaan
- - safari ylipäätänsä toimimaan (päivitys loppuu ekan ruudun jälkeen kesken?)
-
- - nopeampi päivitystahti -> käytä await -tyyppistä päivitä niin usein kun pystyy! mut minimi slotti
-
  - change code -nappi + enter ja esc toimimaan code inputissa
  - share link copy-paste
-
- - navigate out js-eventti joka ampuu stop jos presentoi (tai sit aktiivisempi stop presenting?)
 
  - ohje-ikoni:
  - miten toimii?
@@ -33,7 +26,6 @@
 -------
 
  - 6h refresh page jos ei aktiviteettia (huom jwt expires nyt 7h)
- - tutki pitääkö mediastream "tyhjentää" välillä?
 
  - siivoa käyttämättömät templaattijutut html:stä
 
@@ -42,12 +34,6 @@
  - etähallinta js trigger browser full screen ?
  - etähallinta stop & share napit
  - etähallinta näytä vierailijoiden määrä -> älä upload jos ei ole vierailijoita
-
- - laadun parannus:
- - etähallinta: quality-vs-speed -> syö kaistaa ja/tai hidastaa nopeutta
- - speed: mittaa lähetysnopeutta -> säädä laatua huonommaksi
- - speed: mittaa lähetysnopeutta -> säädä nopeutta huonommaksi ()
- - default: speed
 
  - voiko kuvia helposti diffata nopeasti? screensharessa usein 1:1.. päivitä vain jos muuttunut?
  - > voisi vaikka itse katsoa mallia tästä: https://github.com/rsmbl/Resemble.js
@@ -294,6 +280,7 @@ function upload(req, res, next) {
 	room.mimetype = meta.mimetype
 	room.width = meta.imageWidth
 	room.height = meta.imageHeight
+	room.imageReady = moment()
 
 	if ( !req.body ) {
 		res.status(400).send("Image data is missing")
@@ -301,7 +288,6 @@ function upload(req, res, next) {
 	}
 
 	room.image = req.body
-	room.imageReady = true
 	room.size = req.body.length
 	room.frame++
 
@@ -437,14 +423,7 @@ function stop(req, res, next) {
 
 	let roomId = room.roomId
 
-	ROOMS[roomId].timestamp = moment()
-	ROOMS[roomId].mimetype = null
-	ROOMS[roomId].width = null
-	ROOMS[roomId].height = null
-	ROOMS[roomId].frame = 0
-	ROOMS[roomId].imageReady = null
-	ROOMS[roomId].image = null
-	ROOMS[roomId].size = null
+	clearImage(roomId)
 
 	res.status(200).send("OK")
 	return
@@ -455,6 +434,16 @@ function stop(req, res, next) {
  ***********/
 
 
+
+function clearImage(roomId) {
+	ROOMS[roomId].mimetype = null
+	ROOMS[roomId].width = null
+	ROOMS[roomId].height = null
+	ROOMS[roomId].frame = 0
+	ROOMS[roomId].imageReady = null
+	ROOMS[roomId].image = null
+	ROOMS[roomId].size = null
+}
 function getIdFromPath(path) {
 	if ( path && REGEX_ID.test(path) ) {
 		return path.match(REGEX_ID)[1]
@@ -480,6 +469,10 @@ function roomStatusCheck() {
 		keys.forEach(function(roomId){
 			let room = ROOMS[roomId]
 			let expired = moment().isAfter(moment(room.timestamp).add(30, 'minutes'))
+
+			if ( room.imageReady && moment().diff(room.imageReady, 'seconds') >= 5 ) {
+				clearImage(room.roomId)
+			}
 
 			if ( room.participants ) {
 

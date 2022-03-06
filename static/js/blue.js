@@ -9,21 +9,56 @@ function init() {
 
 	console.log("Bluescreen started ")
 
+	mainLoop()
+
 }
 
 /**********************
- * Start "Threads"    *
+ * Main loop          *
  **********************/
 
-const INTERVALS = {
-	heartbeat: setInterval(heartbeat, 1000)
-	, upload: setInterval(upload, 1000)
-	, download: setInterval(download, 1000)
+
+
+async function mainLoop() {
+		while ( true ) {
+
+		try {
+			switch (getState()) {
+
+				case "empty":
+				case "ready":
+				case "connecting": // TODO: check timestamp and expire
+				case "waiting":
+					await heartbeat()
+					break
+
+				case "watching":
+					await download()
+					break
+
+				case "recording":
+					await upload()
+					break
+
+				case "error":
+					return false
+
+				default:
+					throw `heartbeat: unknown state: ${getState()}`
+
+			}
+		} catch (err) {
+			console.error("Main loop error: " + err)
+			//setState('error')
+		}
+
+		await sleep(200)
+	}
 }
 
-// initiate first heartbeat quickly, if setInterval is slow
-setTimeout(heartbeat, 500)
-
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms || 1))
+}
 
 
 /**********************
@@ -39,13 +74,13 @@ function updateMeta(meta) {
 
 	META = meta
 
-	let partCount = META.activeParticipants - 1
+	let others = META.activeParticipants - 1
 
-	if ( partCount > 1 ) {
+	if ( others > 0 ) {
 		document.querySelector('#participants')
-			.innerText = `${ partCount } other person${ partCount > 1 ? 's' : ''} here!`
+			.innerText = `${ others } other person${ others > 1 ? 's' : ''} here!`
 	} else {
-		document.querySelector('#participants').innerText = '&nbsp;'
+		document.querySelector('#participants').innerText = 'No other persons here.'
 	}
 
 }
@@ -58,8 +93,12 @@ function updateMeta(meta) {
 
 
 var failCount = 0
+var beatInProgress = false
 
 async function heartbeat() {
+	if ( beatInProgress ) { console.log("Skipping hearbeat because it's in progress."); return }
+
+	beatInProgress = true
 
 	if ( failCount > 5 ) {
 		setState('error')
@@ -86,6 +125,7 @@ async function heartbeat() {
 				else if ( META.activeParticipants >= 2 ) {
 					setState('ready')
 				}
+				await sleep(1000)
 				break;
 
 			case "ready":
@@ -95,6 +135,7 @@ async function heartbeat() {
 				else if ( META.activeParticipants < 2 ) {
 					setState('empty')
 				}
+				await sleep(500)
 				break;
 
 			case "watching":
@@ -109,6 +150,7 @@ async function heartbeat() {
 				if ( Object.keys(META).length > 0 ) {
 					setState('waiting')
 				}
+				await sleep(500)
 				break;
 
 			case "waiting":
@@ -123,10 +165,10 @@ async function heartbeat() {
 			/* other states */
 
 			case "error":
-				console.log("hearbeat: error state – killing all interval threads")
-				clearInterval(INTERVALS.heartbeat)
-				clearInterval(INTERVALS.upload)
-				clearInterval(INTERVALS.download)
+				console.log("hearbeat: error state")
+				// clearInterval(INTERVALS.heartbeat)
+				// clearInterval(INTERVALS.upload)
+				// clearInterval(INTERVALS.download)
 				break;
 
 			default:
@@ -137,6 +179,8 @@ async function heartbeat() {
 		console.log("hearbeat failed. fail count: " + failCount)
 		failCount++
 	}
+
+	beatInProgress = false
 }
 
 
@@ -147,9 +191,15 @@ async function heartbeat() {
 
 async function startCapture() {
 	try {
-		let stream = await navigator.mediaDevices.getDisplayMedia({ 
+
+		if ( !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia ) {
+			alert("Your browser doesn't support screen sharing with a web browser.\n\nAt the moment (last checked 6.3.2022) you'll likely need a computer to share your screen.")
+		}
+
+		let stream = await navigator.mediaDevices.getDisplayMedia({
 			video: { cursor: "never" },
-			audio: false 
+			frameRate: 1,
+			audio: false
 		});
 
 		let video = document.querySelector('#video')
@@ -161,7 +211,27 @@ async function startCapture() {
 
 		// TODO don't wait for heartbeat() to deal with state change
 
+
+		stream.getVideoTracks()[0].addEventListener('ended', () => {
+			if ( stopCapturePushed ) {
+				console.log('screensharing was ended by stopCapture() - not doing anything')
+				return
+			}
+
+			console.log('screensharing was ended by event - calling stopCapture()')
+
+			stopCapture()
+		})
+
 	} catch (err) {
+		if ( err.name == "NotAllowedError" ) {
+			console.log("Screen capture denied - going back to ready state")
+
+			setState('ready')
+
+			return false
+		}
+
 		console.error("Screen capture error:", err)
 
 		setState('error')
@@ -172,15 +242,22 @@ async function startCapture() {
 	return true
 }
 
+var stopCapturePushed = false
+
 async function stopCapture() {
+	stopCapturePushed = true
+
 	let video = document.querySelector('#video')
-	let tracks = video.srcObject.getTracks();
-  	tracks.forEach(track => track.stop());
-  	video.srcObject = null;
+
+	if ( video && video.srcObject ) {
+		let tracks = video.srcObject.getTracks();
+	  	tracks.forEach(track => track.stop());
+	  	video.srcObject = null;
+	}
 
   	setState('ready')
 
-	stopUpload()  	
+	stopUpload()
 }
 
 
@@ -189,14 +266,8 @@ async function stopCapture() {
  ****************************/
 
 
-var UPLOADING = false
-
 async function upload() {
 	if ( !getState('recording') ) { return }
-
-	if ( UPLOADING ) {
-		console.debug("download: previous download still in progress - skipping interval")
-	}
 
 	try {
 
@@ -220,29 +291,21 @@ async function upload() {
 	} catch (err) {
 
 		console.error("upload: failed: " + err)
-		DOWNLOADING = false
 	}
 
-	DOWNLOADING = false
 }
 
-
-
-var DOWNLOADING = false
 
 async function download() {
 	if ( !getState('watching') ) { return }
 
-	if ( DOWNLOADING ) {
-		console.debug("download: previous download still in progress - skipping interval")
-	}
-
-	//console.log("Doing download, state is " + getState())
-
-	let oldFrame = META.frame || -1
-
-	DOWNLOADING = true
 	try {
+
+		let display = document.querySelector('#display')
+
+		// if display.src is empty, don't use oldFrame so we always
+		// get a new frame (this happens when joining page during screen cap)
+		let oldFrame = display.src ? META.frame || -1 : -1
 
 		let [responseMeta, responseData] = await get('/download', { frame: oldFrame })
 
@@ -250,7 +313,7 @@ async function download() {
 
 		if ( META.frame > oldFrame ) {
 
-			let display = document.querySelector('#display')
+
 
 			if ( !responseData ) {
 				console.error("download: new frame but no data")
@@ -263,6 +326,7 @@ async function download() {
 
 			console.debug("download: waiting for new content")
 
+			await sleep(500)
 		}
 
 		else {
@@ -274,10 +338,7 @@ async function download() {
 
 	} catch (err) {
 		console.error("download: failed: " + err)
-		DOWNLOADING = false
 	}
-
-	DOWNLOADING = false
 
 }
 
@@ -328,19 +389,6 @@ function captureImageFromVideo(video) {
  * State maskin *
  ****************/
 
-const STATE = {
-	'empty': true
-	,'ready': true
-	,'connecting': true
-	,'waiting': true
-	,'watching': true
-	,'recording': true
-	,'notfound': true
-	,'error': true
-}
-
-var ERROR_TIMEOUT = 10*1000
-var ERROR_TIMER = null
 
 function setState(status) {
 	let body = document.querySelector("body")
