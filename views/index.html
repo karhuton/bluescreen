@@ -64,7 +64,7 @@
 		}
 
 		async function copyLink() {
-	    	let linkToPage = "" + window.location.href
+	    	let linkToPage = getShareLink()
 
 			await navigator.clipboard.writeText(linkToPage)
 
@@ -76,7 +76,7 @@
 		}
 
 		function showShareView() {
-			QrCode.makeCode(window.location.href)
+			QrCode.makeCode( getShareLink() )
 
 			document.querySelector("#shareview").classList.add('visible')
 		}
@@ -85,6 +85,12 @@
 			document.querySelector("#shareview").classList.remove('visible')
 		}
 
+		function getShareLink() {
+			let code = document.querySelector('#code').innerText
+	    	let linkToPage = "https://bluescreen.live/" + code
+
+	    	return linkToPage
+		}
 	</script>
 	<title>Blue Screen</title>
 </head>
