@@ -206,6 +206,7 @@ a,a:visited,a:hover {
 
 div.bottomBar {
 	padding: 1em;
+	padding-bottom: 2em;
 }
 
 #shareview {
