@@ -16,7 +16,7 @@ body {
 }
 
 body.empty { background: #0000aa; }
-body.ready { background: #0000cc; }
+body.ready { background: #0000aa; }
 body.notfound {
 	background-color: #000099;
 	animation-name: animate-notfound;
@@ -101,7 +101,7 @@ div.view {
 div.view.ready {
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
 }
 
 div.view .box {
@@ -168,12 +168,24 @@ a,a:visited,a:hover {
 @keyframes animate-bad-input {
 	0% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
 	50% { background-color: #f00; box-shadow: 0px 0px 10px 5px rgba(255,0,0,0.5); }
-	100 { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+	100% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
 }
 
 #code.bad-input {
 	animation-name: animate-bad-input;
 	animation-duration: 0.5s;
+	animation-iteration-count: 1;
+}
+
+@keyframes animate-copied {
+	0% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+	50% { color: #fff; background-color: #00f; box-shadow: 0px 0px 10px 5px rgba(0,0,255,0.5); }
+	100% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+}
+
+#code.copied {
+	animation-name: animate-copied;
+	animation-duration: 0.25s;
 	animation-iteration-count: 1;
 }
 
@@ -192,4 +204,6 @@ a,a:visited,a:hover {
 	padding: 10px;
 }
 
-
+div.bottomBar {
+	padding: 1em;
+}

@@ -62,16 +62,45 @@
 			}
 		}
 
+		async function askToCopy() {
+
+			if ( navigator.permissions ) {
+
+				let result = await navigator.permissions.query({name: "clipboard-write"})
+
+				if (result.state == "granted" || result.state == "prompt") {
+					copyLink()
+				}
+
+			} else {
+				copyLink()
+			}
+
+			return false
+		}
+
+		async function copyLink() {
+	    	let linkToPage = "" + window.location.href
+
+			await navigator.clipboard.writeText(linkToPage)
+
+			document.querySelector('#code').classList.add('copied')
+
+			setTimeout(() =>{
+				document.querySelector('#code').classList.remove('copied')
+			}, 500)
+		}
 	</script>
 	<title>Blue Screen</title>
 </head>
 <!-- <body onload="init()"> -->
 <body class="${ initialState || 'empty' }" onload="init()" onclick="toggleRecording()">
 	<div class="view empty ready connecting waiting recording notfound error">
+		<div class="topBar"></div>
 		<div class="box">
 			<!-- really oddd. need to focus from grabbing the h1 when clicking above it?? -->
 			<p>&nbsp;</p>
-			<h1 id="code" spellcheck="false" contenteditable="true" enterkeyhint="go" onfocus="if ( event.target.id != 'code' ) { console.log('go away') }; oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipViewClick = true } " onclick="if ( event.target.id != 'code' ) { console.log('go away') }; event.stopPropagation(); event.preventDefault(); return false">${ roomId }</h1>
+			<h1 id="code" spellcheck="false" contenteditable="true" enterkeyhint="go" onfocus="if ( event.target.id != 'code' ) { console.log('go away') }; oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipViewClick = true } " onclick="if ( event.target.id != 'code' ) { console.log('go away') }; event.stopPropagation() ">${ roomId }</h1>
 			<div class="message empty"><p>Press anywhere to start presenting<br />or change the room name</p></div>
 			<div class="message ready"><p>Press anywhere to start presenting<br />or change the room name</p></div>
 			<div class="message connecting">Connecting ...</div>
@@ -83,6 +112,9 @@
 			<br />
 			<div id="participants" class="message ready connecting waiting recording">&nbsp;</div>
 
+		</div>
+		<div class="bottomBar">
+			<div class="message empty ready connecting waiting recording" onclick="copyLink(); event.stopPropagation(); return false;">[ Share link ]</div>
 		</div>
 	</div>
 	<div class="view watching" onclick="">
