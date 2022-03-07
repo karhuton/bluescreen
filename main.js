@@ -1,6 +1,15 @@
 
 /* TODO
  
+
+ - blue.js: välilyönti syöttää '-' eikä virhettä
+
+ - blue.js: recording automaattinen laadunsäätö 0,5 -> 1
+ - mittaa aika jona yks blue.js upload() kestää -> jos alle 1 sekuntia, jaa aika timeSec/10 = x ja nosta laatua 0.x pykälää aina maximiin asti
+ - jos yli sekunti, laske laatua timeSec/10 = x ja pudota 0.x pykälää
+ - (tai sit vaan aina 0.1)
+
+
  - ohje-ikoni:
  - miten toimii?
  -> screensharing over phone
@@ -179,6 +188,11 @@ function index(req, res, next) {
 }
 
 function makeRoom(userId, roomId) {
+
+	if ( ['index', 'upload', 'download'].includes(roomId) ) {
+		throw `makeRoom: illegal room name`
+	}
+
 	let newRoomId = roomId
 
 	if ( !roomId ) {
