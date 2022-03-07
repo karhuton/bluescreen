@@ -1,9 +1,6 @@
 
 /* TODO
  
- - change code -nappi + enter ja esc toimimaan code inputissa
- - share link copy-paste
-
  - ohje-ikoni:
  - miten toimii?
  -> screensharing over phone
@@ -171,10 +168,6 @@ function index(req, res, next) {
 		room = ROOMS[USERS[userId].roomId]
 	}
 
-	if ( moment().diff(moment(room.timestamp), 'minutes') > ROOM_TIMEOUT ) {
-		res.status(419).send("Room expired");
-		return
-	}
 
 	updateParticipantCount(room.roomId)
 
@@ -468,7 +461,7 @@ function roomStatusCheck() {
 
 		keys.forEach(function(roomId){
 			let room = ROOMS[roomId]
-			let expired = moment().isAfter(moment(room.timestamp).add(30, 'minutes'))
+			let expired = moment().isAfter(moment(room.timestamp).add(5, 'minutes'))
 
 			if ( room.imageReady && moment().diff(room.imageReady, 'seconds') >= 5 ) {
 				clearImage(room.roomId)
