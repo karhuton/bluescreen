@@ -17,10 +17,10 @@ function init() {
  * Main loop          *
  **********************/
 
-
+var STOP_EVERYTHING = false
 
 async function mainLoop() {
-		while ( true ) {
+		while ( STOP_EVERYTHING == false ) {
 
 		try {
 			switch (getState()) {

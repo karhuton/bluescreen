@@ -184,4 +184,109 @@
 	});
 
 </script>
+
+<script>
+	var problems = []
+
+	try {
+
+		eval("var foo = 'bar'")
+
+	} catch (err) {
+		problems.push("<p>Eval function: " + err + "</p>")
+	}
+
+	try {
+
+		eval("var testingBody = document.querySelector('body')")
+
+	} catch (err) {
+		problems.push("<p>Function document.querySelector(): " + err + "</p>")
+	}
+
+	try {
+
+		eval("let testingFoo = 'bar'")
+
+	} catch (err) {
+		problems.push("<p>Let -variables: " + err + "</p>")
+	}
+
+
+	try {
+
+		eval("var anonymousFunction = () => { }")
+
+	} catch (err) {
+		problems.push("<p>Anonymous functions: " + err + "</p>")
+	}
+
+
+	try {
+
+		eval("async function testingAsyncFunction() { return true }; async function testingAwait() { await testingAsyncFunction() }; testingAwait()")
+
+	} catch (err) {
+		problems.push("<p>Function async/await: " + err + "</p>")
+	}
+
+
+	try {
+
+		eval("function testingPromise() {}; var testingPromise2 = new Promise(testingPromise)")
+
+	} catch (err) {
+		problems.push("<p>Promise class: " + err + "</p>")
+	}
+
+	try {
+
+		eval("var text = \`hello ${ 1+1 }\`")
+
+	} catch (err) {
+		problems.push("<p>Template literals: " + err + "</p>")
+	}
+
+	try {
+
+		eval("var testingCanvas = document.createElement('canvas'); testingCanvas.getContext('2d')")
+
+	} catch (err) {
+		problems.push("<p>Canvas class: " + err + "</p>")
+	}
+
+
+	try {
+
+		eval("var testingAjax = new XMLHttpRequest();")
+
+	} catch (err) {
+		problems.push("<p>XMLHttpRequest class: " + err + "</p>")
+	}
+
+	try {
+
+		eval("var testingJson = JSON.stringify(['json']); var testingJson2 = JSON.parse(testingJson)")
+
+	} catch (err) {
+		problems.push("<p>JSON class: " + err + "</p>")
+	}
+
+	if ( problems.length > 0 ) {
+		var body = document.getElementsByTagName('body')[0]
+
+		var unsupportedHtml = "<p><br /></p><p><h2>This device has an old browser</h2></p><p>Your browser model is: " + navigator.userAgent + "</p><p>List of unsupported features:</p>"
+
+		for ( var i = 0 ; i < problems.length ; i++ ) {
+			unsupportedHtml += problems[i]
+		}
+
+		unsupportedHtml += "</div><p><br /></p><p>Please send a copy of this page to our support, so we can plan support for old browser versions: info - at - karhuton - com</p>"
+
+		body.innerHTML = unsupportedHtml
+
+		STOP_EVERYTHING = true
+	}
+
+</script>
 </html>
