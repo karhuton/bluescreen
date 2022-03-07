@@ -112,6 +112,7 @@ function heartbeat(req, res, next) {
 	let room = ROOMS[roomId] ? ROOMS[roomId] : null
 
 	if ( room ) {
+		room.timestamp = moment()
 		room.participants[userId].timestamp = moment()
 
 		// remove the image data from the reply
@@ -270,6 +271,8 @@ function upload(req, res, next) {
 		return
 	}
 
+
+	room.timestamp = moment()
 	room.mimetype = meta.mimetype
 	room.width = meta.imageWidth
 	room.height = meta.imageHeight
@@ -283,8 +286,6 @@ function upload(req, res, next) {
 	room.image = req.body
 	room.size = req.body.length
 	room.frame++
-
-	room.timestamp = moment()
 
 	room.participants[userId].timestamp = moment()
 
@@ -390,6 +391,8 @@ function download(req, res, next) {
 
 			return
 		}
+
+		room.timestamp = moment()
 
 		if ( !room.image ) {
 			res.status(204)
