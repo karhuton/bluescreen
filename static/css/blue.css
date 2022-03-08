@@ -90,6 +90,7 @@ body.recording div.view.video {
 }
 
 body.typing .message { display: none !important; }
+body.typing .bottomBar .message { display: block !important; }
 body.typing .typing-info { display: block !important; }
 
 div.view {
