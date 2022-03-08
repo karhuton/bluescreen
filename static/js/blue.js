@@ -44,7 +44,7 @@ async function mainLoop() {
 					return false
 
 				default:
-					throw `heartbeat: unknown state: ${getState()}`
+					throw `mainLoop: unknown state: ${getState()}`
 
 			}
 		} catch (err) {
@@ -106,8 +106,6 @@ async function heartbeat() {
 	}
 
 	try {
-		// TODO reduce heartbeats when download & upload are working
-
 		let [ meta, dataNotUsed ] = await get("/heartbeat")
 		updateMeta(meta)
 
@@ -166,9 +164,6 @@ async function heartbeat() {
 
 			case "error":
 				console.log("hearbeat: error state")
-				// clearInterval(INTERVALS.heartbeat)
-				// clearInterval(INTERVALS.upload)
-				// clearInterval(INTERVALS.download)
 				break;
 
 			default:
@@ -325,7 +320,7 @@ async function download() {
 
 		else if ( META.frame == oldFrame ) {
 
-			console.debug("download: waiting for new content")
+			console.debug("download: no new content, trying again")
 
 			await sleep(500)
 		}
@@ -407,7 +402,11 @@ function setState(status) {
 	}
 
 	if (status == 'error') {
-		ERROR_TIMER = setTimeout(function() { window.location.reload(true); }, ERROR_TIMEOUT)
+
+		ERROR_TIMER = setTimeout(function() {
+			window.location.reload(true);
+		}, ERROR_TIMEOUT)
+
 	} else {
 		clearTimeout(ERROR_TIMER)
 	}
@@ -420,7 +419,9 @@ function getState() {
 
 	if (arguments.length > 0 ) {
 		for ( let i = 0 ; i < arguments.length ; i++ ) {
-			if ( body.classList.contains(arguments[i]) ) { return arguments[i] }
+			if ( body.classList.contains(arguments[i]) ) {
+				return arguments[i]
+			}
 		}
 
 		return null
@@ -430,7 +431,7 @@ function getState() {
 			if ( body.classList.contains(state) ) { return state }
 		}
 
-		throw "Failed to get state from body"
+		throw "getState: failed to get state from body element"
 	}
 }
 
@@ -438,7 +439,7 @@ function getState() {
  * Quality *
  ***********/
 
-var QUALITY = 1
+var QUALITY = 2
 
 const ENCODER = {
 	0: { type: 'image/jpeg', quality: 0.5 }

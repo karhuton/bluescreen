@@ -2,8 +2,6 @@
 /* TODO
  
 
- - blue.js: välilyönti syöttää '-' eikä virhettä
-
  - blue.js: recording automaattinen laadunsäätö 0,5 -> 1
  - mittaa aika jona yks blue.js upload() kestää -> jos alle 1 sekuntia, jaa aika timeSec/10 = x ja nosta laatua 0.x pykälää aina maximiin asti
  - jos yli sekunti, laske laatua timeSec/10 = x ja pudota 0.x pykälää
@@ -92,8 +90,10 @@ app.post('/upload', upload)
 app.get('/download', download)
 app.get('/stop', stop)
 app.get('/heartbeat', heartbeat)
+app.get('/tv', indexTv)
 app.get('/*', index) // request specific roomId
 
+const reservedRoomNames = ['index', 'upload', 'download', 'tv']
 
 app.listen(process.env.PORT || 3000, function () {
   console.log('Listening on port ' + (process.env.PORT || 3000))
@@ -108,6 +108,8 @@ app.listen(process.env.PORT || 3000, function () {
  *************/
 
 function heartbeat(req, res, next) {
+	console.log("i got heartbeat from: " + req.headers['user-agent'])
+
 	let userId = req.user.id
 
 	let roomId = USERS[userId] ? USERS[userId].roomId : null
@@ -145,6 +147,8 @@ function heartbeat(req, res, next) {
 
 function index(req, res, next) {
 
+	console.log("i got index from: " + req.headers['user-agent'])
+
 	// user wants a specific room OR return existing room
 	let userId = req.user.id
 
@@ -157,7 +161,7 @@ function index(req, res, next) {
 	let room
 
 	// this is the case when url has new room
-	if ( pathId ) {
+	if ( pathId && !reservedRoomNames.includes(pathId) ) {
 		if ( !ROOMS[pathId] ) {
 			room = makeRoom(userId, pathId)
 		}
@@ -183,13 +187,29 @@ function index(req, res, next) {
 
 	let initialState = ROOMS[room.roomId].activeParticipants > 1 ? 'ready' : 'empty'
 
-	return res.render('index', {locals: {jwt: req.token, initialState: initialState, roomId: room.roomId, userId: userId }});
+	let fileName = pathId == "tv" ? 'tv' : 'index'
+
+	return res.render( fileName, {
+		locals: {
+			jwt: req.token,
+			initialState: initialState,
+			roomId: room.roomId,
+			userId: userId
+		}
+	});
 
 }
 
+function indexTv(req, res, next) {
+
+	return index(req, res, next, 'tv')
+
+}
+
+
 function makeRoom(userId, roomId) {
 
-	if ( ['index', 'upload', 'download'].includes(roomId) ) {
+	if ( reservedRoomNames.includes(roomId) ) {
 		throw `makeRoom: illegal room name`
 	}
 
@@ -386,6 +406,9 @@ function updateParticipantCount(roomId) {
 }
 
 function download(req, res, next) {
+
+	console.log("i got download from: " + req.headers['user-agent'])
+
 	try {
 		let response = getUserAndRoomAndCheckStuff(req, res)
 
@@ -425,7 +448,7 @@ function download(req, res, next) {
 		console.error("Failed in download reponse", err)
 		res.status(500).send("Fail")
 		return
-	}	
+	}
 }
 
 function stop(req, res, next) {
@@ -469,11 +492,11 @@ function roomStatusCheck() {
 
 	if ( keys.length == 0 ) {
 		if ( !process.env.PRODUCTION ) {
-			console.log("No active rooms")
+//			console.log("No active rooms")
 		}
 	} else {
 		if ( !process.env.PRODUCTION ) {
-			console.log("Active rooms: " + keys.length)
+//			console.log("Active rooms: " + keys.length)
 		}
 
 		keys.forEach(function(roomId){
@@ -489,7 +512,7 @@ function roomStatusCheck() {
 				updateParticipantCount(roomId)
 
 				if ( !process.env.PRODUCTION ) {
-					console.log("roomId: " + roomId + " frame: " + room.frame + (room.image ? " " + room.width + "x" + room.height + " (" + Math.round(room.size/1024) + "kb)" : "") + " timestamp: " + moment(room.timestamp).format('YYYY-MM-DD HH:mm:ss') + ( expired ? " (expired)" : "" ) + " active: " + room.activeParticipants + " inactive: " + room.inactiveParticipants)
+//					console.log("roomId: " + roomId + " frame: " + room.frame + (room.image ? " " + room.width + "x" + room.height + " (" + Math.round(room.size/1024) + "kb)" : "") + " timestamp: " + moment(room.timestamp).format('YYYY-MM-DD HH:mm:ss') + ( expired ? " (expired)" : "" ) + " active: " + room.activeParticipants + " inactive: " + room.inactiveParticipants)
 				}
 			}
 

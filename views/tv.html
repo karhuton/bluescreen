@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Bluescreen.live TV</title>
+	<meta name="description" value="Simple screen sharing across all devices. No ads, no registration, no tracking or apps required. All data deleted after 5 minutes.">
+	<meta name="keywords" value="blue screen live sharing share screen capture online web mobile desktop">
+	<meta name="author" value="karhuton.com">
+
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon.png">
+	<link rel="icon" type="image/png" sizes="180x180" href="/img/appicon.png">
+	<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/img/appicon.png">
+
+	<link href='/css/reset.css' rel='stylesheet' type='text/css'>
+	<link href='/css/blue-retro.css' rel='stylesheet' type='text/css'>
+
+	<link href="https://fonts.googleapis.com/css?family=Overpass+Mono:700&display=block" rel="stylesheet">
+
+	<script>const JWT_TOKEN_FROM_PAGE_LOAD = '${ jwt }'</script>
+
+	<script src="/js/xhttp-json-jwt-retro.js"></script>
+	<script src="/js/tv.js"></script>
+</head>
+<!-- <body onload="init()"> -->
+<body class="${ initialState || 'empty' }" onload="init()">
+	<div class="view empty ready notfound error">
+		<div class="topBar"></div>
+		<div class="box">
+			<p>&nbsp;</p>
+			<h1 id="code" autocorrect="off" autocapitalize="none" spellcheck="false" contenteditable="true" enterkeyhint="go" onfocus="if ( event.target.id != 'code' ) { console.log('go away') }; oldCode = this.innerText; document.querySelector('body').classList.add('typing')" onblur="document.querySelector('body').classList.remove('typing'); if ( oldCode ) { this.innerText = oldCode; skipViewClick = true } " onclick="if ( event.target.id != 'code' ) { console.log('go away') }; event.stopPropagation() ">${ roomId }</h1>
+			<div class="message empty ready"><p>Go to <em>bluescreen.live</em>, type this code<br />and share your screen here</div>
+			<div class="message error">Error – refreshing page automatically</div>
+			<div class="message notfound">Room not found – check code</div>
+			<div class="typing-info"><p>Type new room + hit enter</p></div>
+			<br />
+			<div id="participants" class="message ready">&nbsp;</div>
+
+		</div>
+		<div class="bottomBar">bluescreen.live/tv</div>
+	</div>
+	<div class="view watching">
+		<img id="display" />
+	</div>
+</body>
+<script>
+
+	document.querySelector('#code').addEventListener('keydown', (e) => {
+
+		// if charCode is not defined, 'keypress' will handle it
+		if ( !e.keyCode ) { return }
+
+    	let codeInput = e.target
+
+	    if (e.keyCode == "13") {
+	    	oldCode = null
+	        e.preventDefault();
+	        window.open("/" + codeInput.innerText,"_self")
+	    }
+
+	    if ( e.keyCode == "27" ) {
+	    	codeInput.blur()
+	    }
+
+	});
+
+	document.querySelector('#code').addEventListener('keypress', (e) => {
+
+		// if charCode is not defined, 'keydown' will handle it
+		if ( !e.charCode ) { return }
+
+		let allowedChars = new RegExp("^[\-a-zA-Z0-9]+$")
+
+	    var char = String.fromCharCode(e.charCode)
+
+	    if ( !allowedChars.test( char ) ) {
+	    	codeInput.classList.remove("bad-input")
+	    	codeInput.classList.add("bad-input")
+
+	    	if ( !codeInput.timer ) {
+		    	codeInput.timer = setTimeout( function () {
+		    		codeInput.classList.remove("bad-input")
+		    		delete codeInput.timer
+		    	}, 500)
+	    	}
+
+	        e.preventDefault();
+	    }
+	});
+
+</script>
+
+<script>
+	var problems = []
+
+	try {
+
+		eval("var testingAjax = new XMLHttpRequest();")
+
+	} catch (err) {
+		problems.push("<p>XMLHttpRequest class: " + err + "</p>")
+	}
+
+	try {
+
+		eval("var testingJson = JSON.stringify(['json']); var testingJson2 = JSON.parse(testingJson)")
+
+	} catch (err) {
+		problems.push("<p>JSON class: " + err + "</p>")
+	}
+
+
+	if ( problems.length > 0 ) {
+		var body = document.getElementsByTagName('body')[0]
+
+		var unsupportedHtml = "<p><br /></p><p><h2>This device has an old browser</h2></p><p>Your browser model is: " + navigator.userAgent + "</p><p>List of unsupported features:</p>"
+
+		for ( var i = 0 ; i < problems.length ; i++ ) {
+			unsupportedHtml += problems[i]
+		}
+
+		unsupportedHtml += "</div><p><br /></p><p>Please send a copy of this page to our support, so we can plan support for old browser versions: info - at - karhuton - com</p>"
+
+		body.innerHTML = unsupportedHtml
+
+		STOP_EVERYTHING = true
+	}
+</script>
+</html>

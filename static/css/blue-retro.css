@@ -1,0 +1,187 @@
+html {
+	height: 100%;
+}
+
+body {
+	font-family: "Overpass Mono", monospace;
+	background: #0000aa;
+	color: rgba(255,255,255,0.95);
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+body.empty { background: #0000aa; }
+body.ready { background: #0000aa; }
+body.notfound {
+	background-color: #000099;
+	animation-name: animate-notfound;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	cursor: not-allowed;
+}
+body.waiting { background: #006400; cursor: pointer; }
+body.watching { background: #000000; cursor: not-allowed; }
+body.recording { background: #8b0000; cursor: pointer; }
+body.error { background: #000000; cursor: pointer;}
+body.connecting {
+	background-color: #0000cc;
+	animation-name: animate-connecting;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	cursor: pointer;
+}
+
+@keyframes animate-connecting {
+	0% { background-color: #0000cc; }
+	50% { background-color: #0000ff; }
+	100 { background-color: #0000cc; }
+}
+
+@keyframes animate-notfound {
+	0% { background-color: #0000cc; }
+	50% { background-color: #000022; }
+	100 { background-color: #0000cc; }
+}
+
+body.empty #code { color: #0000aa;	}
+body.ready #code { color: #0000aa;	}
+body.notfound #code { color: #0000aa;	}
+body.watching #code { color: #ffffff; }
+body.error #code { color: #000000; }
+
+body .message { display: none; line-height: 120%;}
+body .typing-info { display: none; }
+
+body.empty .message.empty { display: block; }
+body.ready .message.ready { display: block; }
+body.notfound .message.notfound { display: block; }
+body.watching .message.watching { display: block; }
+body.error .message.error { display: block; }
+
+body.empty div.view.empty { display: flex; }
+body.ready div.view.ready { display: flex; }
+body.notfound div.view.notfound { display: flex; }
+body.watching div.view.watching { display: flex; }
+body.error div.view.error { display: flex; }
+
+body.typing .message { display: none !important; }
+body.typing .typing-info { display: block !important; }
+
+div.view {
+	width: 100%;
+	height: 100%;
+	display: none;
+}
+
+div.view.ready {
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+}
+
+div.view .box {
+	position: relative;
+	width: 70%;
+	min-width: 300px;
+	min-height: 250px;
+	text-align: center;
+}
+
+@media all and (max-width: 500px) {
+	div.view .box {
+		width: 100%;
+	}
+}
+
+div.view.ready {
+	cursor: pointer;
+}
+
+div.view.watching {
+	width: 100%;
+	height:  100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#display {
+	display: inline-block;
+	height: 100%;
+}
+
+h1 {
+	display: inline-block;
+	background: rgba(255,255,255,0.95);
+	margin-bottom: 1em;
+	padding: 10px;
+	padding-top:  14px;
+	font-size: xx-large;
+}
+
+p {
+	margin-bottom: 1em;
+	text-align: center;
+	line-height: 1.75em;
+}
+
+a,a:visited,a:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+#code {
+	font-family: "Overpass Mono", monospace;
+	display: inline-block;
+	background: rgba(255,255,255,0.95);
+	color: #0000aa;	
+	text-align: center;
+	line-height: xx-large;
+	font-size: xx-large;
+	cursor: text;
+	width:  100%;
+	max-width: 350px;
+	white-space: nowrap;
+}
+
+@keyframes animate-bad-input {
+	0% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+	50% { background-color: #f00; box-shadow: 0px 0px 10px 5px rgba(255,0,0,0.5); }
+	100% { background-color: rgba(255,255,255,0.95); box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5); }
+}
+
+#code.bad-input {
+	animation-name: animate-bad-input;
+	animation-duration: 0.5s;
+	animation-iteration-count: 1;
+}
+
+.message {
+	width: 100%;
+	text-align: center;
+}
+
+[contenteditable]:focus {
+    outline: 0px solid transparent;
+    box-shadow: 0px 0px 10px 5px rgba(78,223,255,0.5);
+}
+
+::placeholder {
+	color: rgba(0,0,170,0.3);
+	padding: 10px;
+}
+
+div.bottomBar {
+	padding: 1em;
+	padding-bottom: 2em;
+}
+
+em {
+	border-bottom: solid 1px #fff ;
+}

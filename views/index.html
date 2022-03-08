@@ -39,7 +39,7 @@
 			,'error': true
 		}
 
-		var ERROR_TIMEOUT = 10*1000
+		const ERROR_TIMEOUT = 10*1000
 		var ERROR_TIMER = null
 
 		var skipViewClick = false
@@ -161,7 +161,7 @@
 	    	codeInput.blur()
 	    }
 
-	    if ( !allowedChars.test(e.key) ) {
+	    if ( e.key == " " || !allowedChars.test(e.key) ) {
 	    	codeInput.classList.remove("bad-input")
 	    	codeInput.classList.add("bad-input")
 
@@ -190,28 +190,11 @@
 
 	try {
 
-		eval("var foo = 'bar'")
-
-	} catch (err) {
-		problems.push("<p>Eval function: " + err + "</p>")
-	}
-
-	try {
-
-		eval("var testingBody = document.querySelector('body')")
-
-	} catch (err) {
-		problems.push("<p>Function document.querySelector(): " + err + "</p>")
-	}
-
-	try {
-
 		eval("let testingFoo = 'bar'")
 
 	} catch (err) {
 		problems.push("<p>Let -variables: " + err + "</p>")
 	}
-
 
 	try {
 
@@ -221,6 +204,30 @@
 		problems.push("<p>Anonymous functions: " + err + "</p>")
 	}
 
+	try {
+
+		eval("Object.entries({})")
+
+	} catch (err) {
+		problems.push("<p>Object.entries: " + err + "</p>")
+	}
+
+	try {
+
+		eval("document.createElement('div').classList.add('testingClassList')")
+
+	} catch (err) {
+		problems.push("<p>element.classList: " + err + "</p>")
+	}
+
+
+	try {
+
+		eval("var testingRegex = /^[a-z]$/i")
+
+	} catch (err) {
+		problems.push("<p>RegExp literal notation: " + err + "</p>")
+	}
 
 	try {
 
@@ -273,19 +280,15 @@
 	}
 
 	if ( problems.length > 0 ) {
+
 		var body = document.getElementsByTagName('body')[0]
 
-		var unsupportedHtml = "<p><br /></p><p><h2>This device has an old browser</h2></p><p>Your browser model is: " + navigator.userAgent + "</p><p>List of unsupported features:</p>"
+		body.innerHTML = "<div style='margin-top: 20%; text-align: center'><h2 style='font-size: x-large'>Redirecting to TV version ...</h2></div>"
 
-		for ( var i = 0 ; i < problems.length ; i++ ) {
-			unsupportedHtml += problems[i]
-		}
+		setTimeout(function() {
+			window.open("/tv","_self")
+		}, 3000)
 
-		unsupportedHtml += "</div><p><br /></p><p>Please send a copy of this page to our support, so we can plan support for old browser versions: info - at - karhuton - com</p>"
-
-		body.innerHTML = unsupportedHtml
-
-		STOP_EVERYTHING = true
 	}
 
 </script>
