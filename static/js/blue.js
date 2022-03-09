@@ -439,7 +439,7 @@ function getState() {
  * Quality *
  ***********/
 
-var QUALITY = 2
+var QUALITY = 1
 
 const ENCODER = {
 	0: { type: 'image/jpeg', quality: 0.5 }
