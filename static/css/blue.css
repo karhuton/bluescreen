@@ -210,6 +210,10 @@ div.bottomBar {
 	padding-bottom: 2em;
 }
 
+em {
+	border-bottom: solid 1px #fff ;
+}
+
 #shareview {
 	display: none;
 	position: absolute;
