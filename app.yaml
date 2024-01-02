@@ -1,0 +1,3 @@
+# [START gae_quickstart_yaml]
+runtime: nodejs20
+# [END gae_quickstart_yaml]
