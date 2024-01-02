@@ -46,14 +46,14 @@
  */
 
 const express = require('express')
-	,jwtParse = require('express-jwt')
 	,jwtSign = require('jsonwebtoken')
 	,template = require('express-es6-template-engine')
 	,bodyParser = require('body-parser')
-	,uuid = require('uuid/v4')
 	,hex = require('random-hex')
 	,moment = require('moment')
 
+const { expressjwt: jwtParse } = require('express-jwt')
+const { v4: uuid } = require('uuid')
 
 const ROOM_TIMEOUT = 60
 
@@ -82,7 +82,7 @@ app.engine('html', template);
 app.set('views', 'views')
 app.set('view engine', 'html')
 app.use(express.static('static'))
-app.use(jwtParse({ secret: JWT_SECRET, credentialsRequired: false }), expressJwtHandler)
+app.use(jwtParse({ secret: JWT_SECRET, credentialsRequired: false, algorithms: ["HS256"] }), expressJwtHandler)
 app.use(bodyParser.raw({ type: 'application/data-url', limit: '5mb' }))
 app.use(bodyParser.json())
 
