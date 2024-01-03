@@ -108,10 +108,8 @@ app.listen(process.env.PORT || 3000, function () {
  *************/
 
 function heartbeat(req, res, next) {
-	console.log("i got heartbeat from: " + req.headers['user-agent'])
 
-	let userId = req.user.id
-
+	let userId = req.auth.id
 	let roomId = USERS[userId] ? USERS[userId].roomId : null
 
 	if ( !roomId ) {
@@ -147,10 +145,8 @@ function heartbeat(req, res, next) {
 
 function index(req, res, next) {
 
-	console.log("i got index from: " + req.headers['user-agent'])
-
 	// user wants a specific room OR return existing room
-	let userId = req.user.id
+	let userId = req.auth.id
 
 	if ( !userId ) {
 			res.status(500).send("No user token available")
@@ -335,7 +331,7 @@ function upload(req, res, next) {
 }
 
 function getUserAndRoomAndCheckStuff(req, res, ignoreExpire) {
-	let userId = req.user.id
+	let userId = req.auth.id
 
 	if ( !userId ) {
 		res.status(403).send("Forbidden: no user token found in headers");
@@ -343,7 +339,7 @@ function getUserAndRoomAndCheckStuff(req, res, ignoreExpire) {
 	}
 
 	if ( !USERS[userId] ) {
-		res.status(404).send("Not found");
+		res.status(404).send("User not found");
 		return null
 	}
 
@@ -351,7 +347,7 @@ function getUserAndRoomAndCheckStuff(req, res, ignoreExpire) {
 	let room = ROOMS[roomId]
 
 	if ( !room ) {
-		res.status(404).send("Not found");
+		res.status(404).send("Room not found");
 		return null
 	}
 
@@ -406,8 +402,6 @@ function updateParticipantCount(roomId) {
 }
 
 function download(req, res, next) {
-
-	console.log("i got download from: " + req.headers['user-agent'])
 
 	try {
 		let response = getUserAndRoomAndCheckStuff(req, res)
@@ -536,14 +530,15 @@ function expressHerokuHttpsRedirect(req, res, next) {
 }
 
 function expressJwtHandler(req, res, next) {
-	if ( !req.user ) {
+	if ( !req ) { console.warn("missing req! not doing anything"); return null }
+
+	if ( !req.auth || !req.auth.id ) {
 		let user = { id: uuid() }
 		let token = jwtSign.sign(user, JWT_SECRET, { expiresIn: JWT_EXPIRE })
 
 		USERS[user.id] = user
-		req.user = user
+		req.auth = user
 		req.token = token
-
 	}
 
 	next()
