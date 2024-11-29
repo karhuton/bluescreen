@@ -188,7 +188,7 @@ async function startCapture() {
 	try {
 
 		if ( !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia ) {
-			alert("This device only supports watching screenshares.\n\nYour browser and most mobile devices do not support screensharing, so you have to use a computer to share.")
+			alert("Sorry, your web browser only supports watching screenshares.\n\nYou need a computer to share a screen.")
 			return false
 		}
 
