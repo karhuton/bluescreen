@@ -1,3 +1,0 @@
-runtime: nodejs20
-env_variables:
-  PRODUCTION: 1
