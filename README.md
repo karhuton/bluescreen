@@ -1,4 +1,4 @@
-# bluescreen
+# Bluescreen.live
 
 Bluescreen.live – simplest screen sharing for presentations
 
