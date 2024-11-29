@@ -22,25 +22,25 @@ Bluescreen.live is a very simple screen sharing service with the goal:
 
 ## Example use cases
 
-*1. Share on big screen (meeting room)*
+**1. Share on big screen (meeting room)**
 - open bluescreen.live in the smart tv browser
 - anyone can share to the screen without hdmi/adapters/software etc.
 - leave the TV on: has rotating random code on the screen
 
-*2. Share without big screen (cafés, bars, events)*
+**2. Share without big screen (cafés, bars, events)**
 - presenter on laptop shares QR / link to mobile users
 - mobile users can see material on own phone during talk
 
-*3. Share on my behalf*
+**3. Share on my behalf**
 - one person can connect to the meeting room screen and use bluescreen
 - others can simply share to their screen
 - no switching HDMI cables or broadcast adapters
 
-*4. Sharing without Teams or Meet*
+**4. Sharing without Teams or Meet**
 - share your screen to others when not on a call
 - no need to setup Teams or Meet just for sharing
 
-*5. Sharing at home*
+**5. Sharing at home**
 - open bluescreen.live in the smart tv browser
 - share to the tv from phone (*doesn't work yet*)
 
