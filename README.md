@@ -2,7 +2,7 @@
 
 Simplest screen sharing for presentations and photos.
 
-Optimized for presentations, where 1 frame / second is enough.
+Optimized for presentations, where 1 frame / second is enough.  
 (No real-time streaming, uses good quality screen captures instead.)
 
 No cookies, no tracking, no registration, no ads.
