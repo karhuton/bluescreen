@@ -2,16 +2,17 @@
 
 Bluescreen.live – simplest screen sharing for presentations
 
-Optimized for presentations like powerpoint (no real-time streaming, uses good quality screencaptures)
+Optimized for presentations like powerpoint.
+(No real-time streaming, uses good quality screen captures instead.)
 
 No cookies, no tracking, no registration, no ads.
 
-No stored data: only 1 frame in memory at a time, removed at disconnect or 5 minute timeout.
+No data storage: only in-memory data on server, 1 frame at a time, removed at disconnect or 5 minute timeout.
 
 
 ## Goals of the software
 
-Bluescreen.live is a very simple screensharing service with the goal:
+Bluescreen.live is a very simple screen sharing service with the goal:
 - optimize quality for presentations and text
 - very very simple to use
 - just plain http polling, so works on any network
