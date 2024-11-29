@@ -1,6 +1,6 @@
 # Bluescreen.live
 
-Bluescreen.live – simplest screen sharing for presentations
+Simplest screen sharing for presentations.
 
 Optimized for presentations like powerpoint.
 (No real-time streaming, uses good quality screen captures instead.)
@@ -10,7 +10,7 @@ No cookies, no tracking, no registration, no ads.
 No data storage: only in-memory data on server, 1 frame at a time, removed at disconnect or 5 minute timeout.
 
 
-## Goals of the software
+## Goals
 
 Bluescreen.live is a very simple screen sharing service with the goal:
 - optimize quality for presentations and text
@@ -19,7 +19,7 @@ Bluescreen.live is a very simple screen sharing service with the goal:
 - use very little resources
 - should work on old devices, especially older TVs
 
-## Example use cases:
+## Example use cases
 
 1) Big screen in a meeting room
 - direct your smart tv browser to the site
@@ -47,6 +47,7 @@ https://issues.chromium.org/issues/40418135
 Hoping Apple someday implements screen sharing for mobile Safari
 (no issue tracker yet)
 
+
 ## TODOs
 
 Things to improve:
@@ -54,6 +55,7 @@ Things to improve:
 - client: don't update if sceen doesn't change
 - client: improve robustness and error handling
 - client: downgrade from ES6 (cmp. main.js with tv.js)
+- client: always show qr code & use "share" button instead of tap screen
 - server: remove all or most of node dependencies
 - server: implement bandwidth and quota limits
 - server: implement bad behaving ip banning
