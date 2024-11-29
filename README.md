@@ -47,10 +47,10 @@ Bluescreen.live is a very simple screen sharing service with the goal:
 
 ## Mobile screen sharing doesn't work yet
 
-Waiting for this issue on Android Chromium:
+Waiting for this issue on Android Chromium:  
 https://issues.chromium.org/issues/40418135
 
-Hoping Apple someday implements screen sharing for mobile Safari
+Hoping Apple someday implements screen sharing for mobile Safari  
 (no issue tracker yet)
 
 
